@@ -1,0 +1,51 @@
+//Design Code
+`include "sr_lat"
+`include "sr_ms"
+`include "sr_ff"
+`include "sr_ne"
+module sr_group(output ql,qms,qpe,qne, input clk,s,r);
+  sr_latch SRL(.q(ql),.qbar(),.s(s),.r(r),.clk(clk));
+  master_slave_srlatch SRMS(.q(qms),.qbar(),.clk(clk),.s(s),.r(r));
+  sr_ff SRPE(.q(qpe),.qbar(),.clk(clk),.s(s),.r(r));
+  sr_ffne SRNE(.q(qne),.qbar(),.clk(clk),.s(s),.r(r));
+endmodule
+
+//Test Bench Code
+module tb();
+  wire ql,qms,qpe,qne;
+  reg clk,s,r;
+  sr_group DUT(ql,qms,qpe,qne,clk,s,r);
+   
+  initial
+    begin
+      clk=1'b0;
+      forever #5 clk=~clk;
+    end
+  
+  initial
+    begin
+      s=1'b0; r=1'b1;
+      #10;
+      s=1'b1; r=1'b0;
+      #5;
+      s=1'b0; r=1'b0;
+      #5;
+      s=1'b1; r=1'b1;
+      #5;
+      s=1'b1; r=1'b0;
+      #5;
+      $finish;
+    end
+  
+  initial
+    begin
+      $timeformat(-9,0,"ns",10);
+      $monitor("time=%0t,clk=%b,s=%b,r=%b,ql=%b,qms=%b,qpe=%b,qne=%b",$time,clk,s,r,ql,qms,qpe,qne);
+    end
+  
+  initial
+    begin
+      $dumpfile("test.vcd");
+      $dumpvars(1);
+    end
+endmodule
